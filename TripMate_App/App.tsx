@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -27,20 +27,18 @@ const AppNavigator = () => {
   const { user } = useAuth();
 
   return (
-    <Stack.Navigator
-      initialRouteName={user ? "Main" : "Login"}
-      screenOptions={{ headerShown: false }} // 모든 화면에서 헤더 제거
-    >
+    <Stack.Navigator initialRouteName={user ? "Main" : "Login"} >
       {user ? (
         <>
-          <Stack.Screen name="Main" component={MainTabNavigator} />
-          <Stack.Screen name="Step1Destination" component={Step1DestinationScreen} />
-          <Stack.Screen name="Step2DateSelect" component={Step2DateSelectScreen} />
-          <Stack.Screen name="Step3TimeSelect" component={Step3TimeSelectScreen} />
-          <Stack.Screen name="Step4TransportSelect" component={Step4TransportSelectScreen} />
-          <Stack.Screen name="ScheduleEditor" component={ScheduleEditorScreen} />
-          <Stack.Screen name="ScheduleDetail" component={ScheduleDetailScreen} />
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }}/>
+
+          <Stack.Screen name="Step1Destination" component={Step1DestinationScreen} options={{ title: '여행 계획 시작하기' }}/>
+          <Stack.Screen name="Step2DateSelect" component={Step2DateSelectScreen} options={{ headerShown: false }}/>
+          <Stack.Screen name="Step3TimeSelect" component={Step3TimeSelectScreen} options={{ headerShown: false }}/>
+          <Stack.Screen name="Step4TransportSelect" component={Step4TransportSelectScreen} options={{ headerShown: false }}/>
+          <Stack.Screen name="ScheduleEditor" component={ScheduleEditorScreen} options={{ title: '일정 만들기' }}/>
+          <Stack.Screen name="ScheduleDetail" component={ScheduleDetailScreen} options={{ title: '일정 상세' }}/>
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: '프로필 수정' }}/>
           <Stack.Screen name="MySchedules" component={MySchedulesScreen} />
         </>
       ) : (
@@ -56,10 +54,16 @@ const AppNavigator = () => {
 };
 
 function App() {
+  const navigationRef = useRef(null);
+
+  React.useEffect(() => {
+    global.navigationRef = navigationRef;
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <AppNavigator />
         </NavigationContainer>
       </AuthProvider>

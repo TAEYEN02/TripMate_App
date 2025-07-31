@@ -7,9 +7,11 @@ import {
   SafeAreaView, 
   FlatList,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableOpacity
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import apiClient from '../../api/client';
 
 import ScheduleCard from '../../components/ScheduleCard';
@@ -82,7 +84,13 @@ const MySchedulesScreen = () => {
 
   const renderHeader = () => (
     <>
-      <AppHeader title="내 여행 일정" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.navigate('Main')} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>내 여행 일정</Text>
+        <View style={styles.placeholder} />
+      </View>
       {schedules.length === 0 && !loading && (
         <View style={styles.centerContainer}>
           <Text style={styles.emptyText}>아직 생성된 일정이 없습니다.</Text>
@@ -126,6 +134,28 @@ const MySchedulesScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  placeholder: {
+    width: 40,
+  },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 },
   listContainer: { paddingHorizontal: 15, paddingBottom: 15 },
   emptyText: { fontSize: 18, color: '#868e96', marginBottom: 20 },

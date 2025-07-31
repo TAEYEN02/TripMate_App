@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-const PlaceCard = ({ item, onPlaceClick, onDelete, showDeleteButton = false }) => {
+const PlaceCard = ({ item, onPlaceClick, onDelete, showDeleteButton = false, isDragging = false }) => {
   
   const getImageUrl = () => {
     if (item.photoUrl) {
@@ -19,8 +19,8 @@ const PlaceCard = ({ item, onPlaceClick, onDelete, showDeleteButton = false }) =
   };
 
   return (
-    <View style={styles.card}>
-      <TouchableOpacity style={styles.cardTouchable} onPress={() => onPlaceClick(item)}>
+    <View style={[styles.card, isDragging && styles.draggingCard]}>
+      <View style={styles.cardTouchable}>
         <Image
           style={styles.placeImage}
           source={{ uri: getImageUrl() }}
@@ -31,7 +31,9 @@ const PlaceCard = ({ item, onPlaceClick, onDelete, showDeleteButton = false }) =
           <Text style={styles.category}>{item.category}</Text>
           <Text style={styles.address} numberOfLines={2}>{item.address}</Text>
         </View>
-      </TouchableOpacity>
+      </View>
+      
+
       
       {showDeleteButton && (
         <TouchableOpacity 
@@ -59,6 +61,15 @@ const styles = StyleSheet.create({
     elevation: 3,
     height: 110,
     position: 'relative',
+  },
+  draggingCard: {
+    opacity: 0.7,
+    transform: [{ scale: 1.05 }],
+    shadowColor: '#007bff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   cardTouchable: {
     flexDirection: 'row',
@@ -90,6 +101,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
   },
+
   deleteButton: {
     position: 'absolute',
     top: -8,

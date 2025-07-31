@@ -30,3 +30,4 @@ spring:
 app:
   jwtSecret: 4z6B8E_a-r9T2w5y7x_d-fGjKlOnPqStVbYy_z-1s3u5w8x_A-D_F-H_J-L_N-P_R-T_V-X_Z-b_d-f_h-j
   jwtExpirationInMs: 86400000
+  refreshTokenExpirationInMs: 604800000

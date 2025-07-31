@@ -19,8 +19,8 @@ const LoginScreen = ({ navigation }) => {
     }
     try {
       const response = await client.post('/api/auth/login', { userId, password });
-      const { token, user } = response.data;
-      await login(token, user);
+      const { token, user, refreshToken } = response.data;
+      await login(token, user, refreshToken);
       // AppNavigator가 자동으로 Main 화면으로 전환
     } catch (error) {
       Alert.alert('로그인 실패', '아이디나 비밀번호를 확인해주세요.');

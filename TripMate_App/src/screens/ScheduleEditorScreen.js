@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, SafeAreaView, ActivityIndicator, Alert, Button,
   TouchableOpacity, ScrollView, Modal, FlatList, TextInput
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context'; // 🚀 [추가]
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -259,7 +259,13 @@ const ScheduleEditorScreen = ({ route, navigation }) => {
         await client.post('/api/schedule', requestBody);
         Alert.alert('성공', '일정이 저장되었습니다!');
       }
-      navigation.navigate('MySchedules');
+      // 네비게이션 스택을 리셋하고 MySchedules로 이동
+      navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'MySchedules' }
+        ],
+      });
     } catch (error) {
       console.error('Schedule save error:', error);
       Alert.alert('오류', '저장에 실패했습니다.');
@@ -267,7 +273,6 @@ const ScheduleEditorScreen = ({ route, navigation }) => {
   };
 
   const onDragEnd = ({ data }) => {
-    // 🚀 [수정] 불변성을 지키기 위해 새로운 객체로 상태 업데이트
     setSchedule(prev => {
       const newDailyPlan = { ...prev.dailyPlan };
       newDailyPlan[selectedDate] = data;
@@ -287,102 +292,124 @@ const ScheduleEditorScreen = ({ route, navigation }) => {
           />
         </View>
 
-                 {/* 스크롤 가능한 컨텐츠 영역 */}
-         <ScrollView 
-           style={styles.scrollContainer}
-           contentContainerStyle={styles.scrollContent}
-           showsVerticalScrollIndicator={false}
-         >
-                       <View style={styles.contentContainer}>
-              <View style={styles.controlsContainer}>
-               <TextInput style={styles.titleInput} value={scheduleTitle} onChangeText={setScheduleTitle} />
-              <Text style={styles.dates}>
-                {isEditing
-                  ? `${dayjs(schedule.startDate).format('YYYY.MM.DD')} ~ ${dayjs(schedule.endDate).format('YYYY.MM.DD')}`
-                  : plannerData && plannerData.startDate && plannerData.endDate
-                    ? `${plannerData.startDate} ~ ${plannerData.endDate}`
-                    : '날짜를 선택해주세요'
-                }
-              </Text>
-              
-              {/* 개선된 버튼 디자인 */}
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, isEditing && styles.disabledButton]} 
-                  onPress={handleGenerateSchedule} 
-                  disabled={isEditing}
-                >
-                  <Text style={[styles.actionButtonText, isEditing && styles.disabledButtonText]}>
-                    자동 일정 생성
+                  {/* FlatList로 전체 스크롤 담당 */}
+          <FlatList
+            data={[{ id: 'content' }]}
+            renderItem={() => (
+              <View style={styles.contentContainer}>
+                <View style={styles.controlsContainer}>
+                  <TextInput style={styles.titleInput} value={scheduleTitle} onChangeText={setScheduleTitle} />
+                  <Text style={styles.dates}>
+                    {isEditing
+                      ? `${dayjs(schedule.startDate).format('YYYY.MM.DD')} ~ ${dayjs(schedule.endDate).format('YYYY.MM.DD')}`
+                      : plannerData && plannerData.startDate && plannerData.endDate
+                        ? `${plannerData.startDate} ~ ${plannerData.endDate}`
+                        : '날짜를 선택해주세요'
+                    }
                   </Text>
-                </TouchableOpacity>
+                  
+                  {/* 개선된 버튼 디자인 */}
+                  <View style={styles.buttonRow}>
+                    <TouchableOpacity 
+                      style={[styles.actionButton, isEditing && styles.disabledButton]} 
+                      onPress={handleGenerateSchedule} 
+                      disabled={isEditing}
+                    >
+                      <Text style={[styles.actionButtonText, isEditing && styles.disabledButtonText]}>
+                        자동 일정 생성
+                      </Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity style={styles.actionButton} onPress={handleRecommendPlaces}>
+                      <Text style={styles.actionButtonText}>장소 추천</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity style={styles.actionButton} onPress={() => setSearchModalVisible(true)}>
+                      <Text style={styles.actionButtonText}>위치 추가</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
                 
-                <TouchableOpacity style={styles.actionButton} onPress={handleRecommendPlaces}>
-                  <Text style={styles.actionButtonText}>장소 추천</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.actionButton} onPress={() => setSearchModalVisible(true)}>
-                  <Text style={styles.actionButtonText}>위치 추가</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            
-            {/* 날짜 탭 */}
-            <View style={styles.tabsContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScrollContent}>
-                {dateTabs.map(date => (
-                  <TouchableOpacity 
-                    key={date} 
-                    style={[styles.tabButton, selectedDate === date && styles.activeTab]} 
-                    onPress={() => setSelectedDate(date)}
-                  >
-                    <Text style={[styles.tabText, selectedDate === date && styles.activeTabText]}>
-                      {date.substring(5)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+                {/* 날짜 탭 */}
+                <View style={styles.tabsContainer}>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScrollContent}>
+                    {dateTabs.map(date => (
+                      <TouchableOpacity 
+                        key={date} 
+                        style={[styles.tabButton, selectedDate === date && styles.activeTab]} 
+                        onPress={() => setSelectedDate(date)}
+                      >
+                        <Text style={[styles.tabText, selectedDate === date && styles.activeTabText]}>
+                          {date.substring(5)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
 
-            {/* 장소 목록 */}
-            <View style={styles.placesContainer}>
-              {loading ? (
-                <ActivityIndicator size="large" style={styles.loadingIndicator} />
-              ) : (
-                <>
-                  {schedule.dailyPlan[selectedDate] && schedule.dailyPlan[selectedDate].length > 0 ? (
-                                         <DraggableFlatList
-                       data={schedule.dailyPlan[selectedDate]}
-                       renderItem={({ item, drag, isActive }) => (
-                         <TouchableOpacity onLongPress={drag} disabled={isActive}>
-                           <PlaceCard 
-                             item={item} 
-                             onPlaceClick={setSelectedPlace}
-                             onDelete={handleDeletePlace}
-                             showDeleteButton={true}
-                           />
-                         </TouchableOpacity>
-                       )}
-                       keyExtractor={(item) => item.tempId}
-                       onDragEnd={onDragEnd}
-                       scrollEnabled={false}
-                     />
+                {/* 장소 목록 */}
+                <View style={styles.placesContainer}>
+                  {loading ? (
+                    <ActivityIndicator size="large" style={styles.loadingIndicator} />
                   ) : (
-                    <Text style={styles.noDataText}>일정이 없습니다.</Text>
+                    <>
+                      {schedule.dailyPlan[selectedDate] && schedule.dailyPlan[selectedDate].length > 0 ? (
+                        <>
+                          <Text style={styles.dragHint}>길게 누르고 드래그하여 순서를 변경하세요</Text>
+                          <View style={styles.placesListContainer}>
+                            <DraggableFlatList
+                              data={schedule.dailyPlan[selectedDate]}
+                              keyExtractor={(item) => item.tempId}
+                              onDragEnd={onDragEnd}
+                              scrollEnabled={true}
+                              nestedScrollEnabled={true}
+                              dragItemOverflow={true}
+                              contentContainerStyle={{ paddingBottom: 20 }}
+                              showsVerticalScrollIndicator={true}
+                              bounces={false}
+                              overScrollMode="never"
+                              renderItem={({ item, drag, isActive }) => (
+                                <TouchableOpacity
+                                  onLongPress={drag}
+                                  disabled={isActive}
+                                  delayLongPress={500}
+                                  activeOpacity={1}
+                                  style={[
+                                    styles.draggableItem,
+                                    isActive && styles.draggingItem
+                                  ]}
+                                >
+                                  <PlaceCard 
+                                    item={item} 
+                                    onDelete={handleDeletePlace}
+                                    showDeleteButton={true}
+                                    isDragging={isActive}
+                                  />
+                                </TouchableOpacity>
+                              )}
+                            />
+                          </View>
+                        </>
+                      ) : (
+                        <Text style={styles.noDataText}>일정이 없습니다.</Text>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </View>
-            
-            {/* 저장 버튼 */}
-            <View style={styles.saveButtonContainer}>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveSchedule}>
-                <Text style={styles.saveButtonText}>일정 저장하기</Text>
-              </TouchableOpacity>
-            </View>
-            
-          </View>
-        </ScrollView>
+                </View>
+                
+                {/* 저장 버튼 */}
+                <View style={styles.saveButtonContainer}>
+                  <TouchableOpacity style={styles.saveButton} onPress={handleSaveSchedule}>
+                    <Text style={styles.saveButtonText}>일정 저장하기</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={true}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
 
       {/* 추천 장소 모달 */}
       {isRecommendModalVisible && (
@@ -456,7 +483,7 @@ const ScheduleEditorScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-  mapContainer: { height: '40%', backgroundColor: '#e9ecef' },
+  mapContainer: { height: '25%', backgroundColor: '#e9ecef' },
   scrollContainer: { flex: 1 },
   scrollContent: { flexGrow: 1 },
      contentContainer: { 
@@ -595,6 +622,36 @@ const styles = StyleSheet.create({
     color: '#6c757d', 
     fontSize: 16 
   },
+  draggableItem: {
+    marginBottom: 10,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  placesListContainer: {
+    height: 600, // DraggableFlatList의 높이를 명확히 지정
+  },
+  draggableItem: {
+    marginBottom: 10,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  draggingItem: {
+    opacity: 0.8,
+    transform: [{ scale: 1.05 }],
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   modalOverlay: { 
     flex: 1, 
     justifyContent: 'center', 
@@ -708,6 +765,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
     backgroundColor: '#fff'
   },
+  dragHint: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontStyle: 'italic',
+  },
+
 });
 
 export default ScheduleEditorScreen;

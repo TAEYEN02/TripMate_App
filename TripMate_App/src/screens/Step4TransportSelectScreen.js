@@ -250,7 +250,7 @@ const Step4TransportSelectScreen = ({ route }) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>여행 계획 시작하기</Text>
+        <Text style={styles.headerTitle}>교통편 선택</Text>
         <View style={styles.placeholder} />
       </View>
 

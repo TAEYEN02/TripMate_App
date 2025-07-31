@@ -82,10 +82,12 @@ public class AuthController {
 
         // JWT 토큰생성
         String jwt = tokenProvider.generateToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication);
         
         // 사용자 정보와 토큰을 함께 반환
         return ResponseEntity.ok(Map.of(
             "token", jwt,
+            "refreshToken", refreshToken,
             "user", UserDto.from(user)
         ));
     }
@@ -111,6 +113,47 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User registered successfully!");
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refreshToken");
+        
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.badRequest().body("Refresh token is required");
+        }
+
+        if (!tokenProvider.validateRefreshToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
+
+        try {
+            Long userId = tokenProvider.getUserIdFromJWT(refreshToken);
+            Optional<User> userOptional = userRepository.findById(userId);
+            
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            User user = userOptional.get();
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUserId());
+
+            // 새로운 인증 객체 생성
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+            
+            // 새로운 토큰들 생성
+            String newAccessToken = tokenProvider.generateToken(authentication);
+            String newRefreshToken = tokenProvider.generateRefreshToken(authentication);
+
+            return ResponseEntity.ok(Map.of(
+                "accessToken", newAccessToken,
+                "refreshToken", newRefreshToken
+            ));
+        } catch (Exception e) {
+            logger.error("Error refreshing token: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token refresh failed");
+        }
     }
 
     @PostMapping("/check-userid")

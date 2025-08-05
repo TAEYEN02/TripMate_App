@@ -34,5 +34,8 @@
 - **MySQL**: 데이터 관리
 - **Spring Security + JWT**: 사용자 인증 및 권한 관리
 
+---
 
+## 🎞 시현 영상
+https://github.com/user-attachments/assets/db9fe300-b2b1-49ae-b353-50e4697ffc9b
 

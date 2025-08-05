@@ -27,13 +27,13 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<List<CommentDto>> getComments(@PathVariable Long scheduleId) {
+    public ResponseEntity<List<CommentDto>> getComments(@PathVariable("scheduleId") Long scheduleId) {
         return ResponseEntity.ok(commentService.getComments(scheduleId));
     }
 
     @PostMapping
     public ResponseEntity<CommentDto> createComment(
-            @PathVariable Long scheduleId,
+            @PathVariable("scheduleId")Long scheduleId,
             @RequestBody Map<String, String> request,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         
@@ -47,7 +47,7 @@ public class CommentController {
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable Long commentId,
+            @PathVariable("commentId") Long commentId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         
         commentService.deleteComment(commentId, userPrincipal.getId());

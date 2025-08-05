@@ -91,7 +91,7 @@ public class ScheduleController {
     @GetMapping("/places/recommend")
     public ResponseEntity<List<PlaceDTO>> getRecommendedPlaces(
             @RequestParam("keyword") String keyword,
-            @RequestParam(value = "category", required = false) String category) {
+            @RequestParam(value = "category", required = false, name="category") String category) {
         List<PlaceDTO> recommendedPlaces;
         if (category != null) {
             recommendedPlaces = scheduleService.getRecommendedPlacesByCategory(keyword, category);
@@ -182,7 +182,7 @@ public class ScheduleController {
 	}
 
 	@DeleteMapping("/schedule/place/{placeId}")
-	public ResponseEntity<?> deletePlaceFromSchedule(@PathVariable Long placeId,
+	public ResponseEntity<?> deletePlaceFromSchedule(@PathVariable("placeId") Long placeId,
 			@AuthenticationPrincipal UserPrincipal user) {
 		try {
 			scheduleService.deletePlace(placeId, user.getId());

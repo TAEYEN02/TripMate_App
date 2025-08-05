@@ -49,7 +49,7 @@ public class PlaceController {
 	}
 	
 	@GetMapping("/recommend")
-    public ResponseEntity<List<PlaceDTO>> recommendPlaces(@RequestParam String keyword) {
+    public ResponseEntity<List<PlaceDTO>> recommendPlaces(@RequestParam(name="keyword") String keyword) {
         List<PlaceDTO> places = kakaoPlaceUtil.searchRecommendedPlaces(keyword);
         return ResponseEntity.ok(places);
     }

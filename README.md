@@ -36,6 +36,7 @@
 
 ---
 
-## 🎞 시현 영상
-https://github.com/user-attachments/assets/db9fe300-b2b1-49ae-b353-50e4697ffc9b
+## 🎞 시연 영상
+
+https://github.com/user-attachments/assets/4b9ee2bf-72da-4b18-94ab-faae102a4281
 
